@@ -19,7 +19,7 @@ def build_brief() -> tuple[str, str]:
                                state.data["days"].get(day))
 
     lines = [f"Morning Ethan,\n", "WORKOUT" +
-             (f" — {session['note']}" if session.get("note") else "")]
+             (f" - {session['note']}" if session.get("note") else "")]
     lines.append(session["summary"].rstrip())
     lines.append(f"\nDAILY\n{base['daily']}")
 
@@ -51,7 +51,7 @@ def build_brief() -> tuple[str, str]:
                  " Resets Sunday night.")
     lines.append("Reply to add tasks, log a game, or change the week.")
 
-    subject = f"☀️ {today.strftime('%a %d %b')} — {session['type']}, {len(picked)} tasks"
+    subject = f"☀️ {today.strftime('%a %d %b')} - {session['type']}, {len(picked)} tasks"
     return subject, "\n".join(lines)
 
 

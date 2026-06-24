@@ -30,7 +30,7 @@ def _occurrences(cal, start: date, end: date) -> list:
 
 
 def _events_in_range(start: date, end: date) -> list[dict]:
-    """Events in [start, end) — end exclusive."""
+    """Events in [start, end) - end exclusive."""
     out, seen = [], set()
     for cal_cfg in config.CALENDARS:
         if not cal_cfg["url"]:

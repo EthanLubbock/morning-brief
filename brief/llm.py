@@ -10,7 +10,7 @@ VALID_ACTIONS = {"add_constraint", "set_week_mode", "add_todo",
                  "complete_todo", "reset_week", "persist_current_changes"}
 
 PARSE_SYSTEM = """You convert a personal email into scheduling intents.
-Respond with ONLY a JSON object {"intents": [ ... ]} — no prose, no markdown.
+Respond with ONLY a JSON object {"intents": [ ... ]} - no prose, no markdown.
 Each intent has an "action" plus action-specific fields:
 
 - add_constraint: applies_to (list of lowercase weekdays), constraint (short text),
