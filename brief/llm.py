@@ -42,7 +42,8 @@ def parse_email(body: str) -> list[dict]:
             messages=[{"role": "system", "content": PARSE_SYSTEM},
                       {"role": "user", "content": body[:4000]}],
         )
-        data = json.loads(resp.choices[0].message.content)
+        raw = resp.choices[0].message.content.strip().removeprefix("```json").removeprefix("```").removesuffix("```").strip()
+        data = json.loads(raw)
         intents = data.get("intents", []) if isinstance(data, dict) else []
         return [i for i in intents
                 if isinstance(i, dict) and i.get("action") in VALID_ACTIONS]
@@ -53,8 +54,11 @@ def parse_email(body: str) -> list[dict]:
 
 def replan_week(base: dict, state_data: dict) -> tuple[dict, str]:
     """Return ({day: delta}, rationale). Falls back to plain notes on failure."""
-    upcoming = [e for e in calendar_feed.upcoming_events(7)
-                if e.get("role") in ("mine", "shared")]  # partner cals are context-only
+    upcoming = [
+        {"title": e.get("title"), "date": e.get("date"), "role": e.get("role")}
+        for e in calendar_feed.upcoming_events(7)
+        if e.get("role") in ("mine", "shared")
+    ]
     payload = {
         "week_mode": state_data["week_mode"],
         "active_variant": base["variants"][state_data["week_mode"]],
@@ -68,19 +72,36 @@ def replan_week(base: dict, state_data: dict) -> tuple[dict, str]:
         "Obey the rules exactly. Calendar events are immovable. "
         "Output ONLY a JSON object: {\"days\": {day: {...}}, \"rationale\": \"one sentence\"}."
     )
-    try:
-        resp = _client.chat.completions.create(
-            model=config.OPENAI_MODEL, temperature=0,
-            response_format={"type": "json_object"},
-            messages=[{"role": "system", "content": system},
-                      {"role": "user", "content": json.dumps(payload)}],
-        )
-        out = json.loads(resp.choices[0].message.content)
-        return out.get("days", {}), out.get("rationale", "")
-    except Exception:
-        log.exception("replan_week failed")
-        days = {}                                     # graceful degradation: plain notes
-        for c in state_data["constraints"]:
-            for d in c.get("applies_to", []):
-                days.setdefault(d, {}).setdefault("note", c.get("raw", ""))
-        return days, "Applied constraints as notes (replan unavailable)."
+    messages = [
+        {"role": "system", "content": system},
+        {"role": "user", "content": json.dumps(payload)},
+    ]
+    last_exc = None
+    for attempt in range(1, 3):  # max 2 attempts
+        try:
+            resp = _client.chat.completions.create(
+                model=config.OPENAI_MODEL, temperature=0,
+                response_format={"type": "json_object"},
+                messages=messages,
+            )
+            raw = resp.choices[0].message.content.strip()
+            raw = raw.removeprefix("```json").removeprefix("```").removesuffix("```").strip()
+            out = json.loads(raw)
+            return out.get("days", {}), out.get("rationale", "")
+        except json.JSONDecodeError as exc:
+            last_exc = exc
+            log.warning("replan_week attempt %d returned invalid JSON: %s", attempt, exc)
+            # Feed the bad response back so the model can self-correct
+            messages.append({"role": "assistant", "content": resp.choices[0].message.content})
+            messages.append({"role": "user", "content": "That was not valid JSON. Return ONLY the JSON object, no prose or markdown."})
+        except Exception as exc:
+            last_exc = exc
+            log.exception("replan_week attempt %d failed", attempt)
+            break  # non-JSON errors won't improve on retry
+
+    log.error("replan_week giving up after retries: %s", last_exc)
+    days = {}
+    for c in state_data["constraints"]:
+        for d in c.get("applies_to", []):
+            days.setdefault(d, {}).setdefault("note", c.get("raw", ""))
+    return days, "Applied constraints as notes (replan unavailable)."
