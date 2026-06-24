@@ -1,0 +1,18 @@
+[project]
+name = "morning-brief"
+version = "1.0.0"
+requires-python = ">=3.10"
+dependencies = [
+    "openai>=1.0",
+    "pyyaml",
+    "python-dotenv",
+    "requests",
+    "icalendar",
+    "recurring-ical-events",
+]
+
+[tool.setuptools]
+packages = ["brief"]
+
+[project.optional-dependencies]
+test = ["pytest"]

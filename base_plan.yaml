@@ -1,0 +1,82 @@
+timezone: Europe/London
+
+week_mode: default # default | game - live value, reset.py restores to default
+game_day: saturday # only used when week_mode = game
+
+daily: "Steps 8-10k. Protein-first every meal, don't drink calories, stop at ~80% full."
+
+variants:
+  default:
+    monday:
+      type: gym
+      summary: |
+        LIFTS (Squat + Bench)
+        • Squat 5x5 @ 90kg (drop to 85 if volume feels heavy)
+        • Bench 5x5 @ 65kg
+        • Romanian deadlift 3x8 @ 70kg
+        • Row 3x8-10 @ ~60kg BB / 26kg DB
+        Then 20-30 min Zone 2.
+    tuesday:
+      type: run
+      summary: "Easy run from home, 30-40 min, conversational. Flexible timing, or rest."
+    wednesday:
+      type: gym
+      summary: |
+        LIFTS (Deadlift + Press)
+        • Deadlift 3x5 @ 110kg (submaximal)
+        • Overhead press 4x6-8 @ ~40kg
+        • Front/goblet squat 3x8 @ ~55-60kg / 28-32kg goblet
+        • Pull-ups 3x8-10 (or lat pulldown ~60kg / assisted)
+        Then 20-30 min Zone 2.
+    thursday:
+      type: run
+      summary: "Easy run, 30-40 min, conversational. Flexible, or rest."
+    friday:
+      type: gym
+      summary: |
+        LIFTS (Bench + Squat volume)
+        • Bench 5x5 @ 65kg
+        • Squat 3x5 @ 80kg (~88% of Monday)
+        • Incline DB press or dips 3x8-10 @ ~24kg DB / bw dips
+        • Row or face pulls 3x12 @ light ~15-20kg cable
+        Then 20-30 min Zone 2.
+    saturday:
+      type: run_optional
+      summary: "Optional longer easy run 45-60 min if fresh, else rest."
+    sunday:
+      type: rest
+      summary: "Rest + steps."
+
+  game:
+    monday:
+      {
+        type: gym,
+        summary: "Squat + Bench day (as default Monday) + short Zone 2.",
+      }
+    tuesday:
+      {
+        type: rest,
+        summary: "Rest / easy steps. No standalone run in a game week.",
+      }
+    wednesday:
+      {
+        type: gym,
+        summary: "Deadlift + Press day (as default Wednesday) + short Zone 2.",
+      }
+    thursday: { type: rest, summary: "Rest / easy steps." }
+    friday:
+      {
+        type: gym,
+        summary: "Bench + Squat volume (as default Friday) + short Zone 2.",
+      }
+    saturday: { type: game, summary: "GAME - this is your intensity day." }
+    sunday: { type: rest, summary: "Rest + steps." }
+
+replan_rules:
+  - "If legs feel heavy, shorten or drop the run first - never the lift."
+  - "Never invent exercises or change loads; only move/drop sessions and add notes."
+  - "Prefer moving a session within the same day, then swapping days, then dropping."
+
+recurring_tasks:
+  - title: "Weekly meal plan + shop order"
+    day: sunday

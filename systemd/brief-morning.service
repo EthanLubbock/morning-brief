@@ -1,0 +1,8 @@
+# brief-morning.service
+[Unit]
+Description=Send morning brief
+[Service]
+Type=oneshot
+User=pi
+WorkingDirectory=/home/pi/morning-brief
+ExecStart=/home/pi/morning-brief/.venv/bin/python -m brief.morning

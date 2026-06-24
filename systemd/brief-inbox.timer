@@ -1,0 +1,8 @@
+# brief-inbox.timer
+[Unit]
+Description=Poll inbox every 10 minutes
+[Timer]
+OnCalendar=*:0/10
+Persistent=true
+[Install]
+WantedBy=timers.target

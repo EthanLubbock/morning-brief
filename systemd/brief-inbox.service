@@ -1,0 +1,8 @@
+# brief-inbox.service
+[Unit]
+Description=Poll inbox and process emailed changes
+[Service]
+Type=oneshot
+User=pi
+WorkingDirectory=/home/pi/morning-brief
+ExecStart=/home/pi/morning-brief/.venv/bin/python -m brief.inbox

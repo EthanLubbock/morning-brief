@@ -1,0 +1,8 @@
+# brief-reset.service
+[Unit]
+Description=Reset week to base programme
+[Service]
+Type=oneshot
+User=pi
+WorkingDirectory=/home/pi/morning-brief
+ExecStart=/home/pi/morning-brief/.venv/bin/python -m brief.reset
